@@ -79,8 +79,10 @@ extension VideoRequestLoader: VideoDownloaderDelegate {
         guard (error as NSError?)?.code != NSURLErrorCancelled else { return }
         
         if error == nil {
+            print("request.finishLoading")
             request.finishLoading()
         } else {
+            print("request.finishLoading error")
             request.finishLoading(with: error)
         }
         

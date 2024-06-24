@@ -53,6 +53,7 @@ public class VideoDownloader {
     }
     
     public func cancel() {
+        print("VideoDownloaderHandler cancel from VideoDownloader")
         downloaderHandler?.cancel()
         downloaderHandler = nil
     }

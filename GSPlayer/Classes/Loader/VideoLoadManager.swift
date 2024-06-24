@@ -17,7 +17,7 @@ public class VideoLoadManager: NSObject {
     public var customHTTPHeaderFields: ((URL) -> [String: String]?)?
     
     private(set) var loaderMap: [URL: VideoLoader] = [:]
-    
+
 }
 
 extension VideoLoadManager: AVAssetResourceLoaderDelegate {
@@ -32,13 +32,15 @@ extension VideoLoadManager: AVAssetResourceLoaderDelegate {
             ))
             return false
         }
-        
+
         VideoPreloadManager.shared.remove(url: url)
         
         do {
             if let loader = loaderMap[url] {
+                print("resourceLoader append 1")
                 loader.append(request: loadingRequest)
             } else {
+                print("resourceLoader append 2")
                 let loader = try VideoLoader(url: url)
                 loader.delegate = self
                 loader.append(request: loadingRequest)

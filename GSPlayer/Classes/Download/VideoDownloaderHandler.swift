@@ -53,10 +53,12 @@ class VideoDownloaderHandler {
     }
     
     deinit {
+        print("VideoDownloaderHandler cancel from deinit")
         cancel()
     }
     
     func start() {
+        print("VideoDownloaderHandler start")
         processActions()
     }
     
@@ -66,10 +68,12 @@ class VideoDownloaderHandler {
     }
     
     func resume() {
+        print("task resume")
         task?.resume()
     }
     
     func suspend() {
+        print("task suspend")
         task?.suspend()
     }
     
@@ -99,6 +103,7 @@ extension VideoDownloaderHandler: VideoDownloaderSessionDelegateHandlerDelegate 
         guard !isCancelled else { return }
         
         let range = NSRange(location: startOffset, length: data.count)
+//        print("urlSession didReceive startOffset = \(startOffset), length \(data.count),isCancelled: \(isCancelled), \(String(describing: dataTask.originalRequest?.url?.lastPathComponent))")
         if cacheHandler.cache(data: data, for: range)
         {
             cacheHandler.save()
@@ -129,9 +134,13 @@ extension VideoDownloaderHandler: VideoDownloaderSessionDelegateHandlerDelegate 
 private extension VideoDownloaderHandler {
     
     func processActions() {
-        guard !isCancelled else { return }
+        guard !isCancelled else {
+            print("💫 processActions isCancel")
+            return
+        }
         guard let action = actions.first else {
             delegate?.handler(self, didFinish: nil)
+            print("💫 processActions no action")
             return
         }
         
@@ -141,6 +150,7 @@ private extension VideoDownloaderHandler {
             let data = cacheHandler.cachedData(for: action.range)
             delegate?.handler(self, didReceive: data, isLocal: true)
             processActions()
+            print("💫 processActions action is local, bye")
             return
         }
         
@@ -170,6 +180,7 @@ private extension VideoDownloaderHandler {
         
         task = session?.dataTask(with: urlRequest)
         task?.resume()
+        print("💫 processActions action is remote, resume! 🚀")
     }
     
     func notifyProgress(flush: Bool) {

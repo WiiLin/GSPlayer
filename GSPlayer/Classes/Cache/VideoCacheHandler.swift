@@ -46,6 +46,7 @@ public class VideoCacheHandler {
     }
     
     func actions(for range: NSRange) -> [VideoCacheAction] {
+        print("actions for range location: \(range.location), length: \(range.length)")
         guard range.location != NSNotFound else { return [] }
         
         var localActions = [VideoCacheAction]()
@@ -122,7 +123,7 @@ public class VideoCacheHandler {
                 ))
             }
         }
-        
+        print("actions \(localRemoteActions)")
         return localRemoteActions
     }
     

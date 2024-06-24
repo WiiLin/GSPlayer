@@ -205,9 +205,10 @@ open class VideoPlayerView: UIView {
         } else {
             state = .loading
         }
-        
+
         player.replaceCurrentItem(with: playerItem)
-        
+        print("🔊 play! playerItem.status = \(playerItem.status)")
+
         observe(player: player)
         observe(playerItem: playerItem)
     }
@@ -297,7 +298,7 @@ private extension VideoPlayerView {
     func configureInit() {
         
         isHidden = true
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerItemDidReachEnd(notification:)),
@@ -318,7 +319,7 @@ private extension VideoPlayerView {
         case .playing, .paused: isHidden = false
         default:                isHidden = true
         }
-        
+        print("🔊 state \(state)")
         stateDidChanged?(state)
     }
     
@@ -331,6 +332,7 @@ private extension VideoPlayerView {
         }
         
         playerLayerReadyForDisplayObservation = playerLayer.observe(\.isReadyForDisplay) { [unowned self, unowned player] playerLayer, _ in
+            print("🔊 isReadyForDisplay Observation \(playerLayer.isReadyForDisplay), rate \(player.rate)")
             if playerLayer.isReadyForDisplay, player.rate > 0 {
                 self.isLoaded = true
                 self.state = .playing
@@ -340,12 +342,16 @@ private extension VideoPlayerView {
         playerTimeControlStatusObservation = player.observe(\.timeControlStatus) { [unowned self] player, _ in
             switch player.timeControlStatus {
             case .paused:
+                print("🔊 timeControlStatus Observation paused")
                 guard !self.isReplay else { break }
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
                 if self.pausedReason == .waitingKeepUp { player.playImmediately(atRate: speedRate) }
+
             case .waitingToPlayAtSpecifiedRate:
+                print("🔊 timeControlStatus Observation waitingToPlayAtSpecifiedRate")
                 break
             case .playing:
+                print("🔊 timeControlStatus Observation playing")
                 if self.playerLayer.isReadyForDisplay, player.rate > 0 {
                     self.isLoaded = true
                     if self.playProgress == 0, self.isReplay { self.isReplay = false; break }
@@ -369,6 +375,7 @@ private extension VideoPlayerView {
         playerBufferingObservation = playerItem.observe(\.loadedTimeRanges) { [unowned self] item, _ in
             if case .paused = self.state, self.pausedReason != .hidden {
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
+                print("🔊 loadedTimeRanges paused(playProgress)")
             }
             
             if self.bufferProgress >= 0.99 || (self.currentBufferDuration - self.currentDuration) > 3 {
@@ -377,14 +384,16 @@ private extension VideoPlayerView {
                 VideoPreloadManager.shared.pause()
             }
         }
-        
+
         playerItemStatusObservation = playerItem.observe(\.status) { [unowned self] item, _ in
+            print("🔊 playerItem status \(item.status) ,error = \(item.error)")
             if item.status == .failed, let error = item.error as NSError? {
                 self.state = .error(error)
             }
         }
         
         playerItemKeepUpObservation = playerItem.observe(\.isPlaybackLikelyToKeepUp) { [unowned self] item, _ in
+            print("🔊 isPlaybackLikelyToKeepUp Observation \(item.isPlaybackLikelyToKeepUp)")
             if item.isPlaybackLikelyToKeepUp {
                 if self.player?.rate == 0, self.pausedReason == .waitingKeepUp {
                     self.player?.playImmediately(atRate: speedRate)
