@@ -18,6 +18,11 @@ public class VideoLoadManager: NSObject {
     
     private(set) var loaderMap: [URL: VideoLoader] = [:]
 
+    public func cancel(url: URL) {
+        guard let videoLoader = loaderMap[url] else { return }
+        videoLoader.cancel()
+    }
+
 }
 
 extension VideoLoadManager: AVAssetResourceLoaderDelegate {
@@ -34,7 +39,7 @@ extension VideoLoadManager: AVAssetResourceLoaderDelegate {
         }
 
         VideoPreloadManager.shared.remove(url: url)
-        
+
         do {
             if let loader = loaderMap[url] {
                 print("resourceLoader append 1")

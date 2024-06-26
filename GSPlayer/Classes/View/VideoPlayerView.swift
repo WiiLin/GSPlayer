@@ -175,6 +175,7 @@ open class VideoPlayerView: UIView {
     open func play(for url: URL) {
         guard playerURL != url else {
             pausedReason = .waitingKeepUp
+            player?.seek(to: CMTime.zero)
             player?.playImmediately(atRate: speedRate)
             return
         }
@@ -190,7 +191,7 @@ open class VideoPlayerView: UIView {
         
         let playerItem = AVPlayerItem(loader: url)
         playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
-        
+
         self.player = player
         self.playerURL = url
         self.pausedReason = .waitingKeepUp
@@ -297,7 +298,7 @@ private extension VideoPlayerView {
     
     func configureInit() {
         
-        isHidden = true
+        isHidden = false
 
         NotificationCenter.default.addObserver(
             self,
@@ -317,7 +318,7 @@ private extension VideoPlayerView {
         
         switch state {
         case .playing, .paused: isHidden = false
-        default:                isHidden = true
+        default:                isHidden = false
         }
         print("🔊 state \(state)")
         stateDidChanged?(state)
@@ -377,12 +378,15 @@ private extension VideoPlayerView {
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
                 print("🔊 loadedTimeRanges paused(playProgress)")
             }
-            
-            if self.bufferProgress >= 0.99 || (self.currentBufferDuration - self.currentDuration) > 3 {
-                VideoPreloadManager.shared.start()
-            } else {
-                VideoPreloadManager.shared.pause()
+            if let timeRange = item.loadedTimeRanges.first?.timeRangeValue {
+                let loadedTime = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)
+                let totalTime = CMTimeGetSeconds(item.duration)
+                let string = "🔊 loadedTimeRanges Observation 背後 \(String(format: "%.2f", loadedTime)) 秒 / 共 \( String(format: "%.2f", totalTime)) 秒"
+                print(string)
             }
+
+
+            guard let url = playerURL else { return }
         }
 
         playerItemStatusObservation = playerItem.observe(\.status) { [unowned self] item, _ in

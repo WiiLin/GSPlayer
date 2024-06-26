@@ -12,7 +12,7 @@ class FeedCell: UITableViewCell {
 
     @IBOutlet weak var playerView: VideoPlayerView!
     
-    private var url: URL!
+    private(set) var url: URL!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -32,7 +32,7 @@ class FeedCell: UITableViewCell {
         playerView.play(for: url)
         playerView.isHidden = false
     }
-    
+
     func pause() {
         playerView.pause(reason: .hidden)
     }
