@@ -30,8 +30,8 @@ protocol VideoDownloaderHandlerDelegate: AnyObject {
     
 }
 
-class VideoDownloaderHandler {
-    
+class VideoDownloaderHandler: ClassNameProtocol {
+
     weak var delegate: VideoDownloaderHandlerDelegate?
     
     private let url: URL
@@ -57,6 +57,7 @@ class VideoDownloaderHandler {
     }
     
     func start() {
+        log("start")
         processActions()
     }
     
@@ -66,10 +67,12 @@ class VideoDownloaderHandler {
     }
     
     func resume() {
+        log("resume")
         task?.resume()
     }
     
     func suspend() {
+        log("suspend")
         task?.suspend()
     }
     
@@ -99,6 +102,7 @@ extension VideoDownloaderHandler: VideoDownloaderSessionDelegateHandlerDelegate 
         guard !isCancelled else { return }
         
         let range = NSRange(location: startOffset, length: data.count)
+//        log("didReceive startOffset = \(startOffset), length \(data.count),isCancelled: \(isCancelled), \(String(describing: dataTask.originalRequest?.url?.lastPathComponent))")
         if cacheHandler.cache(data: data, for: range)
         {
             cacheHandler.save()
@@ -129,8 +133,12 @@ extension VideoDownloaderHandler: VideoDownloaderSessionDelegateHandlerDelegate 
 private extension VideoDownloaderHandler {
     
     func processActions() {
-        guard !isCancelled else { return }
+        guard !isCancelled else {
+            log("processActions isCancel")
+            return
+        }
         guard let action = actions.first else {
+            log("processActions no action")
             delegate?.handler(self, didFinish: nil)
             return
         }
@@ -138,12 +146,13 @@ private extension VideoDownloaderHandler {
         actions.removeFirst()
         
         guard action.actionType == .remote else {
+            log("processActions action is local, bye")
             let data = cacheHandler.cachedData(for: action.range)
             delegate?.handler(self, didReceive: data, isLocal: true)
             processActions()
             return
         }
-        
+        log("processActions action is remote, resume! 🚀")
         sessionDelegate = VideoDownloaderSessionDelegateHandler(delegate: self)
         
         session = URLSession(
@@ -170,6 +179,7 @@ private extension VideoDownloaderHandler {
         
         task = session?.dataTask(with: urlRequest)
         task?.resume()
+
     }
     
     func notifyProgress(flush: Bool) {

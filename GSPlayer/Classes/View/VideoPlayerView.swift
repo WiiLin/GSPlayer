@@ -175,6 +175,7 @@ open class VideoPlayerView: UIView {
     open func play(for url: URL) {
         guard playerURL != url else {
             pausedReason = .waitingKeepUp
+            player?.seek(to: CMTime.zero)
             player?.playImmediately(atRate: speedRate)
             return
         }
@@ -190,7 +191,7 @@ open class VideoPlayerView: UIView {
         
         let playerItem = AVPlayerItem(loader: url)
         playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
-        
+
         self.player = player
         self.playerURL = url
         self.pausedReason = .waitingKeepUp
@@ -205,13 +206,39 @@ open class VideoPlayerView: UIView {
         } else {
             state = .loading
         }
-        
+
         player.replaceCurrentItem(with: playerItem)
-        
+        GSLogManager.shared.log("play! playerItem.status = \(playerItem.status)")
+
         observe(player: player)
         observe(playerItem: playerItem)
     }
-    
+
+    open func playHLS(for avPlayer: AVPlayer, url: URL, playerItem: AVPlayerItem) {
+
+
+        observe(player: nil)
+        observe(playerItem: nil)
+
+        self.player?.currentItem?.cancelPendingSeeks()
+        self.player?.currentItem?.asset.cancelLoading()
+
+        self.player = avPlayer
+        self.playerURL = url
+        self.pausedReason = .waitingKeepUp
+        self.replayCount = 0
+        self.isReplay = false
+        self.isLoaded = false
+
+        isLoaded = true
+        avPlayer.playImmediately(atRate: speedRate)
+
+        GSLogManager.shared.log("play! playerItem.status = \(playerItem.status)")
+
+        observe(player: player)
+        observe(playerItem: playerItem)
+    }
+
     /// Replay video.
     ///
     /// - Parameter resetCount: Reset replayCount
@@ -296,8 +323,8 @@ private extension VideoPlayerView {
     
     func configureInit() {
         
-        isHidden = true
-        
+        isHidden = false
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerItemDidReachEnd(notification:)),
@@ -316,9 +343,9 @@ private extension VideoPlayerView {
         
         switch state {
         case .playing, .paused: isHidden = false
-        default:                isHidden = true
+        default:                isHidden = false
         }
-        
+        GSLogManager.shared.log("state \(state)")
         stateDidChanged?(state)
     }
     
@@ -331,6 +358,7 @@ private extension VideoPlayerView {
         }
         
         playerLayerReadyForDisplayObservation = playerLayer.observe(\.isReadyForDisplay) { [unowned self, unowned player] playerLayer, _ in
+            GSLogManager.shared.log("isReadyForDisplay Observation \(playerLayer.isReadyForDisplay), rate \(player.rate)")
             if playerLayer.isReadyForDisplay, player.rate > 0 {
                 self.isLoaded = true
                 self.state = .playing
@@ -340,12 +368,16 @@ private extension VideoPlayerView {
         playerTimeControlStatusObservation = player.observe(\.timeControlStatus) { [unowned self] player, _ in
             switch player.timeControlStatus {
             case .paused:
+                GSLogManager.shared.log("timeControlStatus Observation paused")
                 guard !self.isReplay else { break }
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
                 if self.pausedReason == .waitingKeepUp { player.playImmediately(atRate: speedRate) }
+
             case .waitingToPlayAtSpecifiedRate:
+                GSLogManager.shared.log("timeControlStatus Observation waitingToPlayAtSpecifiedRate")
                 break
             case .playing:
+                GSLogManager.shared.log("timeControlStatus Observation playing")
                 if self.playerLayer.isReadyForDisplay, player.rate > 0 {
                     self.isLoaded = true
                     if self.playProgress == 0, self.isReplay { self.isReplay = false; break }
@@ -369,22 +401,28 @@ private extension VideoPlayerView {
         playerBufferingObservation = playerItem.observe(\.loadedTimeRanges) { [unowned self] item, _ in
             if case .paused = self.state, self.pausedReason != .hidden {
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
+                GSLogManager.shared.log("loadedTimeRanges paused(playProgress)")
             }
-            
-            if self.bufferProgress >= 0.99 || (self.currentBufferDuration - self.currentDuration) > 3 {
-                VideoPreloadManager.shared.start()
-            } else {
-                VideoPreloadManager.shared.pause()
+            if let timeRange = item.loadedTimeRanges.first?.timeRangeValue {
+                let loadedTime = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)
+                let totalTime = CMTimeGetSeconds(item.duration)
+                let string = "loadedTimeRanges Observation \(String(format: "%.2f", loadedTime)) 秒 / 共 \( String(format: "%.2f", totalTime)) 秒"
+                GSLogManager.shared.log(string)
             }
+
+
+            guard let url = playerURL else { return }
         }
-        
+
         playerItemStatusObservation = playerItem.observe(\.status) { [unowned self] item, _ in
+            GSLogManager.shared.log("playerItem status \(item.status) ,error = \(item.error)")
             if item.status == .failed, let error = item.error as NSError? {
                 self.state = .error(error)
             }
         }
         
         playerItemKeepUpObservation = playerItem.observe(\.isPlaybackLikelyToKeepUp) { [unowned self] item, _ in
+            GSLogManager.shared.log("isPlaybackLikelyToKeepUp Observation \(item.isPlaybackLikelyToKeepUp)")
             if item.isPlaybackLikelyToKeepUp {
                 if self.player?.rate == 0, self.pausedReason == .waitingKeepUp {
                     self.player?.playImmediately(atRate: speedRate)

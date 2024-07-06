@@ -17,13 +17,17 @@ public class VideoLoadManager: NSObject {
     public var customHTTPHeaderFields: ((URL) -> [String: String]?)?
     
     private(set) var loaderMap: [URL: VideoLoader] = [:]
-    
+
+    public func cancel(url: URL) {
+        guard let videoLoader = loaderMap[url] else { return }
+        videoLoader.cancel()
+    }
+
 }
 
 extension VideoLoadManager: AVAssetResourceLoaderDelegate {
 
     public func resourceLoader(_ resourceLoader: AVAssetResourceLoader, shouldWaitForLoadingOfRequestedResource loadingRequest: AVAssetResourceLoadingRequest) -> Bool {
-        
         guard let url = loadingRequest.url else {
             reportError?(NSError(
                 domain: "me.gesen.player.loader",
@@ -32,13 +36,15 @@ extension VideoLoadManager: AVAssetResourceLoaderDelegate {
             ))
             return false
         }
-        
+
         VideoPreloadManager.shared.remove(url: url)
-        
+
         do {
             if let loader = loaderMap[url] {
+                log("shouldWaitForLoadingOfRequestedResource resourceLoader append 1")
                 loader.append(request: loadingRequest)
             } else {
+                log("shouldWaitForLoadingOfRequestedResource resourceLoader append 2")
                 let loader = try VideoLoader(url: url)
                 loader.delegate = self
                 loader.append(request: loadingRequest)

@@ -51,8 +51,9 @@ extension AVPlayerItem {
             let url = url,
             let configuration = try? VideoCacheManager.cachedConfiguration(for: url)
             else { return false }
-        
-        return configuration.downloadedByteCount >= 1024 * 768
+        let isEnoughToPlay = configuration.downloadedByteCount >= VideoPreloadManager.shared.preloadByteCount
+        log("isEnoughToPlay \(isEnoughToPlay) downloadedByteCount \(configuration.downloadedByteCount)")
+        return isEnoughToPlay
     }
     
     convenience init(loader url: URL) {

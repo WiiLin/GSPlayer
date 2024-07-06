@@ -53,6 +53,7 @@ public class VideoDownloader {
     }
     
     public func cancel() {
+        log("cancel from VideoDownloader")
         downloaderHandler?.cancel()
         downloaderHandler = nil
     }
@@ -71,11 +72,22 @@ extension VideoDownloader: VideoDownloaderHandlerDelegate {
             
             let contentType = httpResponse
                 .value(forHeaderKey: "Content-Type") ?? ""
-            
+
             let isByteRangeAccessSupported = httpResponse
                 .value(forHeaderKey: "Accept-Ranges")?
                 .contains("bytes") ?? false
-            
+//            log("contentLength \(contentLength)")
+//            log("contentType \(contentType)")
+//            log("isByteRangeAccessSupported \(isByteRangeAccessSupported)")
+//            log("Accept-Ranges \(httpResponse.value(forHeaderKey: "Accept-Ranges"))")
+//            log("url \(response.url)")
+//            for field in httpResponse.allHeaderFields {
+//                log("field \(field.key) = \(field.value)")
+//            }
+//            log("allHeaderFields \(httpResponse.allHeaderFields)")
+            log("Accept-Ranges \(httpResponse.value(forHeaderKey: "Accept-Ranges"))")
+
+
             cacheHandler.set(info: VideoInfo(
                 contentLength: contentLength,
                 contentType: contentType,

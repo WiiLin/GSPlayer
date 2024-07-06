@@ -72,6 +72,7 @@ extension VideoRequestLoader: VideoDownloaderDelegate {
     }
     
     func downloader(_ downloader: VideoDownloader, didReceive data: Data) {
+        log("didReceive data length \(data.count), \(downloader.url) 📩")
         request.dataRequest?.respond(with: data)
     }
     
@@ -79,8 +80,10 @@ extension VideoRequestLoader: VideoDownloaderDelegate {
         guard (error as NSError?)?.code != NSURLErrorCancelled else { return }
         
         if error == nil {
+            log("request.finishLoading")
             request.finishLoading()
         } else {
+            log("request.finishLoading error")
             request.finishLoading(with: error)
         }
         
