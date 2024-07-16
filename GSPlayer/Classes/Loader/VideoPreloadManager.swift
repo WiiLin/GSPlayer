@@ -25,20 +25,20 @@ public class VideoPreloadManager: NSObject {
     private func startPreload(url: URL) {
         if let downloader = downloaderDictionary[url] {
 
-            log("preload resume \(url)")
+            gslog("preload resume \(url)")
             downloader.resume()
         } else {
             guard !VideoLoadManager.shared.loaderMap.keys.contains(url) else {
-                log("preloading \(url)")
+                gslog("preloading \(url)")
                 return
             }
             guard let cacheHandler = try? VideoCacheHandler(url: url) else {
-                log("cacheHandler nil \(url)")
+                gslog("cacheHandler nil \(url)")
                 return
             }
-            log("downloadedByteCount: \(cacheHandler.configuration.downloadedByteCount), \(url)")
+            gslog("downloadedByteCount: \(cacheHandler.configuration.downloadedByteCount), \(url)")
             guard cacheHandler.configuration.downloadedByteCount < preloadByteCount else {
-                log("enough \(url) ✅")
+                gslog("enough \(url) ✅")
                 didFinish?( url,nil)
                 return
             }
@@ -48,19 +48,19 @@ public class VideoPreloadManager: NSObject {
             
             downloader.download(from: 0, length: preloadByteCount)
             self.downloaderDictionary[url] = downloader
-            log("start \(url.lastPathComponent)")
+            gslog("start \(url)")
         }
     }
     
     public func pause(url:URL) {
         downloaderDictionary[url]?.suspend()
-        log("pause \(url.lastPathComponent)")
+        gslog("pause \(url)")
     }
     
     func remove(url: URL) {
-        log("will remove \(url.lastPathComponent)")
+        gslog("will remove \(url)")
         guard let downloader = downloaderDictionary[url] else {
-            log("remove failed downloader = nil  \(url)")
+            gslog("remove failed downloader = nil  \(url)")
             return
         }
         downloader.cancel()
@@ -72,18 +72,18 @@ public class VideoPreloadManager: NSObject {
 extension VideoPreloadManager: VideoDownloaderDelegate {
     
     public func downloader(_ downloader: VideoDownloader, didReceive response: URLResponse) {
-        log("didReceive response, \(downloader.url) ")
+        gslog("didReceive response, \(downloader.url) ")
     }
     
     public func downloader(_ downloader: VideoDownloader, didReceive data: Data) {
-        log("didReceive data length \(data.count), \(downloader.url)")
+        gslog("didReceive data length \(data.count), \(downloader.url)")
     }
     
     public func downloader(_ downloader: VideoDownloader, didFinished error: Error?) {
         if let error = error {
-            log("didFinished error \(error), \(downloader.url)")
+            gslog("didFinished error \(error), \(downloader.url)")
         } else {
-            log("didFinished success , \(downloader.url) ✅")
+            gslog("didFinished success , \(downloader.url) ✅")
         }
         self.remove(url: downloader.url)
         didFinish?( downloader.url,error)

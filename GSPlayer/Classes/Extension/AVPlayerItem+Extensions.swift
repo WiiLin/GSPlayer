@@ -52,7 +52,7 @@ extension AVPlayerItem {
             let configuration = try? VideoCacheManager.cachedConfiguration(for: url)
             else { return false }
         let isEnoughToPlay = configuration.downloadedByteCount >= VideoPreloadManager.shared.preloadByteCount
-        log("isEnoughToPlay \(isEnoughToPlay) downloadedByteCount \(configuration.downloadedByteCount)")
+        gslog("isEnoughToPlay \(isEnoughToPlay) downloadedByteCount \(configuration.downloadedByteCount)")
         return isEnoughToPlay
     }
     

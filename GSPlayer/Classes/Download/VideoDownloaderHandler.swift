@@ -57,7 +57,7 @@ class VideoDownloaderHandler: ClassNameProtocol {
     }
     
     func start() {
-        log("start")
+        gslog("start")
         processActions()
     }
     
@@ -67,12 +67,12 @@ class VideoDownloaderHandler: ClassNameProtocol {
     }
     
     func resume() {
-        log("resume")
+        gslog("resume")
         task?.resume()
     }
     
     func suspend() {
-        log("suspend")
+        gslog("suspend")
         task?.suspend()
     }
     
@@ -134,11 +134,11 @@ private extension VideoDownloaderHandler {
     
     func processActions() {
         guard !isCancelled else {
-            log("processActions isCancel")
+            gslog("processActions isCancel")
             return
         }
         guard let action = actions.first else {
-            log("processActions no action")
+            gslog("processActions no action")
             delegate?.handler(self, didFinish: nil)
             return
         }
@@ -146,13 +146,13 @@ private extension VideoDownloaderHandler {
         actions.removeFirst()
         
         guard action.actionType == .remote else {
-            log("processActions action is local, bye")
+            gslog("processActions action is local, bye")
             let data = cacheHandler.cachedData(for: action.range)
             delegate?.handler(self, didReceive: data, isLocal: true)
             processActions()
             return
         }
-        log("processActions action is remote, resume! 🚀")
+        gslog("processActions action is remote, resume! 🚀")
         sessionDelegate = VideoDownloaderSessionDelegateHandler(delegate: self)
         
         session = URLSession(

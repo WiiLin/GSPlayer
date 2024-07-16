@@ -8,12 +8,12 @@
 import Foundation
 
 
-func log(_ message: String, file: String = #file, line: Int = #line) {
+public func gslog(_ message: String, file: String = #file, line: Int = #line) {
     GSLogManager.shared.log(message, file: file, line: line)
 }
 
 public class GSLogManager {
-    static let shared = GSLogManager()
+    public static let shared = GSLogManager()
 
     public var isLoggingEnabled: Bool = true
 
@@ -22,7 +22,7 @@ public class GSLogManager {
     func log(_ message: String, file: String = #file, line: Int = #line) {
         if isLoggingEnabled {
             let fileName = (file as NSString).lastPathComponent
-            print("[\(fileName):\(line)] \(message)")
+            print("🔉 [\(fileName):\(line)] \(message)")
         }
     }
 }

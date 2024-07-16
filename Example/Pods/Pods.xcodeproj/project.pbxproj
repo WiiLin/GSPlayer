@@ -19,6 +19,16 @@
 		1AF611F7DE173742A1F7565AEC12A7BC /* VideoCacheHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09099B685853F69CF0AB9CCA4089D286 /* VideoCacheHandler.swift */; };
 		1C9775CF44ED4FE20C2B14692AA94F77 /* VideoFullscreenTransitioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3461AAA35F5329583D2B42A8DE936C5B /* VideoFullscreenTransitioner.swift */; };
 		276FE5CA27CA87DE47D72F6589A7B2FB /* VideoDownloaderSessionDelegateHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F51ACDE5AC0E4F8084E9700FF39E980 /* VideoDownloaderSessionDelegateHandler.swift */; };
+		28EA3A612C46C25C00A88AAB /* HLSPreloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A582C46C25C00A88AAB /* HLSPreloadManager.swift */; };
+		28EA3A622C46C25C00A88AAB /* HLSPreloadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A592C46C25C00A88AAB /* HLSPreloadModel.swift */; };
+		28EA3A632C46C25C00A88AAB /* VideoInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A5B2C46C25C00A88AAB /* VideoInfo.swift */; };
+		28EA3A642C46C25C00A88AAB /* VideoLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A5C2C46C25C00A88AAB /* VideoLoader.swift */; };
+		28EA3A652C46C25C00A88AAB /* VideoLoadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A5D2C46C25C00A88AAB /* VideoLoadManager.swift */; };
+		28EA3A662C46C25C00A88AAB /* VideoPreloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A5E2C46C25C00A88AAB /* VideoPreloadManager.swift */; };
+		28EA3A672C46C25C00A88AAB /* VideoRequestLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A5F2C46C25C00A88AAB /* VideoRequestLoader.swift */; };
+		28EA3A6A2C46C27B00A88AAB /* GSLogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A682C46C27B00A88AAB /* GSLogManager.swift */; };
+		28EA3A6D2C46C29400A88AAB /* NSObject+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A6B2C46C29400A88AAB /* NSObject+Extensions.swift */; };
+		28EA3A6E2C46C29400A88AAB /* URL+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EA3A6C2C46C29400A88AAB /* URL+Extensions.swift */; };
 		305546B4819AB7F0914089ABE207223B /* Float+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0268C6AB88C9537A701E59403EF27E3 /* Float+Extensions.swift */; };
 		4B54AFC8D50A84452C1ACBA448D448D9 /* VideoCacheConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122539524D4891A93F299F988A26B95E /* VideoCacheConfiguration.swift */; };
 		5C56149593A6BCAFFD13B2C1C7803E92 /* AVPlayer+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD2C106EE0A42EE42AF3106F000485F /* AVPlayer+Extensions.swift */; };
@@ -59,6 +69,16 @@
 		193E799015BA1F5B504B2DA844691B2B /* VideoLoadManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoLoadManager.swift; sourceTree = "<group>"; };
 		1E2530CDAB0D506F098F6653C3659F9F /* VideoPlayerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 		2804A1F35F35696170A0A6FADBA1719F /* VideoDownloadInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoDownloadInfo.swift; sourceTree = "<group>"; };
+		28EA3A582C46C25C00A88AAB /* HLSPreloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HLSPreloadManager.swift; sourceTree = "<group>"; };
+		28EA3A592C46C25C00A88AAB /* HLSPreloadModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HLSPreloadModel.swift; sourceTree = "<group>"; };
+		28EA3A5B2C46C25C00A88AAB /* VideoInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoInfo.swift; sourceTree = "<group>"; };
+		28EA3A5C2C46C25C00A88AAB /* VideoLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoLoader.swift; sourceTree = "<group>"; };
+		28EA3A5D2C46C25C00A88AAB /* VideoLoadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoLoadManager.swift; sourceTree = "<group>"; };
+		28EA3A5E2C46C25C00A88AAB /* VideoPreloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoPreloadManager.swift; sourceTree = "<group>"; };
+		28EA3A5F2C46C25C00A88AAB /* VideoRequestLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoRequestLoader.swift; sourceTree = "<group>"; };
+		28EA3A682C46C27B00A88AAB /* GSLogManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GSLogManager.swift; sourceTree = "<group>"; };
+		28EA3A6B2C46C29400A88AAB /* NSObject+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSObject+Extensions.swift"; sourceTree = "<group>"; };
+		28EA3A6C2C46C29400A88AAB /* URL+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URL+Extensions.swift"; sourceTree = "<group>"; };
 		28EC5C2F9CEFDB105215B9C0D17CD538 /* String+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		3461AAA35F5329583D2B42A8DE936C5B /* VideoFullscreenTransitioner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoFullscreenTransitioner.swift; sourceTree = "<group>"; };
 		3F51ACDE5AC0E4F8084E9700FF39E980 /* VideoDownloaderSessionDelegateHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoDownloaderSessionDelegateHandler.swift; sourceTree = "<group>"; };
@@ -120,6 +140,9 @@
 		0EBE0DB9FC88C03911A820D9F5CE1736 /* GSPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				28EA3A692C46C27B00A88AAB /* LogManager */,
+				28EA3A5A2C46C25C00A88AAB /* HLS */,
+				28EA3A602C46C25C00A88AAB /* Loader */,
 				56FEB37A8BCC1847B6291EE57E496C20 /* Cache */,
 				667297AD6DC9D08C8ED060E019E4D38E /* Download */,
 				D9CFE094586BDF966132F1164C83E800 /* Extension */,
@@ -145,6 +168,38 @@
 			);
 			name = "Support Files";
 			path = "Example/Pods/Target Support Files/GSPlayer";
+			sourceTree = "<group>";
+		};
+		28EA3A5A2C46C25C00A88AAB /* HLS */ = {
+			isa = PBXGroup;
+			children = (
+				28EA3A582C46C25C00A88AAB /* HLSPreloadManager.swift */,
+				28EA3A592C46C25C00A88AAB /* HLSPreloadModel.swift */,
+			);
+			name = HLS;
+			path = GSPlayer/Classes/HLS;
+			sourceTree = "<group>";
+		};
+		28EA3A602C46C25C00A88AAB /* Loader */ = {
+			isa = PBXGroup;
+			children = (
+				28EA3A5B2C46C25C00A88AAB /* VideoInfo.swift */,
+				28EA3A5C2C46C25C00A88AAB /* VideoLoader.swift */,
+				28EA3A5D2C46C25C00A88AAB /* VideoLoadManager.swift */,
+				28EA3A5E2C46C25C00A88AAB /* VideoPreloadManager.swift */,
+				28EA3A5F2C46C25C00A88AAB /* VideoRequestLoader.swift */,
+			);
+			name = Loader;
+			path = GSPlayer/Classes/Loader;
+			sourceTree = "<group>";
+		};
+		28EA3A692C46C27B00A88AAB /* LogManager */ = {
+			isa = PBXGroup;
+			children = (
+				28EA3A682C46C27B00A88AAB /* GSLogManager.swift */,
+			);
+			name = LogManager;
+			path = GSPlayer/Classes/LogManager;
 			sourceTree = "<group>";
 		};
 		56FEB37A8BCC1847B6291EE57E496C20 /* Cache */ = {
@@ -268,6 +323,8 @@
 		D9CFE094586BDF966132F1164C83E800 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				28EA3A6B2C46C29400A88AAB /* NSObject+Extensions.swift */,
+				28EA3A6C2C46C29400A88AAB /* URL+Extensions.swift */,
 				D6824D0F703292D0334DA5EB1AB7E5C5 /* AVAssetResourceLoadingRequest+Extensions.swift */,
 				9BD2C106EE0A42EE42AF3106F000485F /* AVPlayer+Extensions.swift */,
 				C6BE17D504F4ABDC384AA0919524D6D5 /* AVPlayerItem+Extensions.swift */,
@@ -399,8 +456,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				61B251600028079FDB025F05BF2655EE /* AVAssetResourceLoadingRequest+Extensions.swift in Sources */,
+				28EA3A612C46C25C00A88AAB /* HLSPreloadManager.swift in Sources */,
 				5C56149593A6BCAFFD13B2C1C7803E92 /* AVPlayer+Extensions.swift in Sources */,
 				70115C02C9F21B0CF8308E94B6F21088 /* AVPlayerItem+Extensions.swift in Sources */,
+				28EA3A6A2C46C27B00A88AAB /* GSLogManager.swift in Sources */,
 				10A0E65F6E65AB4EC065B165DA7ADA3C /* Double+Extensions.swift in Sources */,
 				305546B4819AB7F0914089ABE207223B /* Float+Extensions.swift in Sources */,
 				FAE4758627184CE63BB75626B370798B /* GSPlayer-dummy.m in Sources */,
@@ -412,11 +471,19 @@
 				8B4A65354A57575F36992DB29630807F /* VideoCacheManager.swift in Sources */,
 				96BE5E8C685B33D071C122C0266A5294 /* VideoDownloader.swift in Sources */,
 				FA234608DE377B943CF692F90B71F476 /* VideoDownloaderHandler.swift in Sources */,
+				28EA3A622C46C25C00A88AAB /* HLSPreloadModel.swift in Sources */,
+				28EA3A6E2C46C29400A88AAB /* URL+Extensions.swift in Sources */,
 				276FE5CA27CA87DE47D72F6589A7B2FB /* VideoDownloaderSessionDelegateHandler.swift in Sources */,
+				28EA3A662C46C25C00A88AAB /* VideoPreloadManager.swift in Sources */,
 				19E3AE50E5D12F2DD9308B3C6DDD49D5 /* VideoDownloadInfo.swift in Sources */,
 				E2D88533B3BDBD727427502B5426C2F7 /* VideoFullscreenPlayerView.swift in Sources */,
 				1C9775CF44ED4FE20C2B14692AA94F77 /* VideoFullscreenTransitioner.swift in Sources */,
+				28EA3A672C46C25C00A88AAB /* VideoRequestLoader.swift in Sources */,
 				A116C683883FAD8CD979185ADB15B793 /* VideoInfo.swift in Sources */,
+				28EA3A632C46C25C00A88AAB /* VideoInfo.swift in Sources */,
+				28EA3A642C46C25C00A88AAB /* VideoLoader.swift in Sources */,
+				28EA3A652C46C25C00A88AAB /* VideoLoadManager.swift in Sources */,
+				28EA3A6D2C46C29400A88AAB /* NSObject+Extensions.swift in Sources */,
 				B5B8735CAF270205B34ACF6D532E8F8C /* VideoLoader.swift in Sources */,
 				16FCBE24A8D6F87449FB75289B439A45 /* VideoLoadManager.swift in Sources */,
 				7D0C60FEDC20918E9124739D6FAF732F /* VideoPlayerView.swift in Sources */,

@@ -208,7 +208,7 @@ open class VideoPlayerView: UIView {
         }
 
         player.replaceCurrentItem(with: playerItem)
-        GSLogManager.shared.log("play! playerItem.status = \(playerItem.status)")
+        gslog("play! playerItem.status = \(playerItem.status)")
 
         observe(player: player)
         observe(playerItem: playerItem)
@@ -233,7 +233,7 @@ open class VideoPlayerView: UIView {
         isLoaded = true
         avPlayer.playImmediately(atRate: speedRate)
 
-        GSLogManager.shared.log("play! playerItem.status = \(playerItem.status)")
+        gslog("play! playerItem.status = \(playerItem.status)")
 
         observe(player: player)
         observe(playerItem: playerItem)
@@ -345,7 +345,7 @@ private extension VideoPlayerView {
         case .playing, .paused: isHidden = false
         default:                isHidden = false
         }
-        GSLogManager.shared.log("state \(state)")
+        gslog("state \(state)")
         stateDidChanged?(state)
     }
     
@@ -358,7 +358,7 @@ private extension VideoPlayerView {
         }
         
         playerLayerReadyForDisplayObservation = playerLayer.observe(\.isReadyForDisplay) { [unowned self, unowned player] playerLayer, _ in
-            GSLogManager.shared.log("isReadyForDisplay Observation \(playerLayer.isReadyForDisplay), rate \(player.rate)")
+            gslog("isReadyForDisplay Observation \(playerLayer.isReadyForDisplay), rate \(player.rate)")
             if playerLayer.isReadyForDisplay, player.rate > 0 {
                 self.isLoaded = true
                 self.state = .playing
@@ -368,16 +368,16 @@ private extension VideoPlayerView {
         playerTimeControlStatusObservation = player.observe(\.timeControlStatus) { [unowned self] player, _ in
             switch player.timeControlStatus {
             case .paused:
-                GSLogManager.shared.log("timeControlStatus Observation paused")
+                gslog("timeControlStatus Observation paused")
                 guard !self.isReplay else { break }
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
                 if self.pausedReason == .waitingKeepUp { player.playImmediately(atRate: speedRate) }
 
             case .waitingToPlayAtSpecifiedRate:
-                GSLogManager.shared.log("timeControlStatus Observation waitingToPlayAtSpecifiedRate")
+                gslog("timeControlStatus Observation waitingToPlayAtSpecifiedRate")
                 break
             case .playing:
-                GSLogManager.shared.log("timeControlStatus Observation playing")
+                gslog("timeControlStatus Observation playing")
                 if self.playerLayer.isReadyForDisplay, player.rate > 0 {
                     self.isLoaded = true
                     if self.playProgress == 0, self.isReplay { self.isReplay = false; break }
@@ -401,13 +401,13 @@ private extension VideoPlayerView {
         playerBufferingObservation = playerItem.observe(\.loadedTimeRanges) { [unowned self] item, _ in
             if case .paused = self.state, self.pausedReason != .hidden {
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
-                GSLogManager.shared.log("loadedTimeRanges paused(playProgress)")
+                gslog("loadedTimeRanges paused(playProgress)")
             }
             if let timeRange = item.loadedTimeRanges.first?.timeRangeValue {
                 let loadedTime = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)
                 let totalTime = CMTimeGetSeconds(item.duration)
                 let string = "loadedTimeRanges Observation \(String(format: "%.2f", loadedTime)) 秒 / 共 \( String(format: "%.2f", totalTime)) 秒"
-                GSLogManager.shared.log(string)
+                gslog(string)
             }
 
 
@@ -415,14 +415,14 @@ private extension VideoPlayerView {
         }
 
         playerItemStatusObservation = playerItem.observe(\.status) { [unowned self] item, _ in
-            GSLogManager.shared.log("playerItem status \(item.status) ,error = \(item.error)")
+            gslog("playerItem status \(item.status) ,error = \(item.error)")
             if item.status == .failed, let error = item.error as NSError? {
                 self.state = .error(error)
             }
         }
         
         playerItemKeepUpObservation = playerItem.observe(\.isPlaybackLikelyToKeepUp) { [unowned self] item, _ in
-            GSLogManager.shared.log("isPlaybackLikelyToKeepUp Observation \(item.isPlaybackLikelyToKeepUp)")
+            gslog("isPlaybackLikelyToKeepUp Observation \(item.isPlaybackLikelyToKeepUp)")
             if item.isPlaybackLikelyToKeepUp {
                 if self.player?.rate == 0, self.pausedReason == .waitingKeepUp {
                     self.player?.playImmediately(atRate: speedRate)

@@ -41,10 +41,10 @@ extension VideoLoadManager: AVAssetResourceLoaderDelegate {
 
         do {
             if let loader = loaderMap[url] {
-                log("shouldWaitForLoadingOfRequestedResource resourceLoader append 1")
+//                GSLogManager.shared.log("shouldWaitForLoadingOfRequestedResource resourceLoader append 1")
                 loader.append(request: loadingRequest)
             } else {
-                log("shouldWaitForLoadingOfRequestedResource resourceLoader append 2")
+//                GSLogManager.shared.log("shouldWaitForLoadingOfRequestedResource resourceLoader append 2")
                 let loader = try VideoLoader(url: url)
                 loader.delegate = self
                 loader.append(request: loadingRequest)
