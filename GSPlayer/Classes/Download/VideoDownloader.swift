@@ -53,7 +53,7 @@ public class VideoDownloader {
     }
     
     public func cancel() {
-        log("cancel from VideoDownloader")
+        gslog("cancel from VideoDownloader")
         downloaderHandler?.cancel()
         downloaderHandler = nil
     }
@@ -85,7 +85,7 @@ extension VideoDownloader: VideoDownloaderHandlerDelegate {
 //                log("field \(field.key) = \(field.value)")
 //            }
 //            log("allHeaderFields \(httpResponse.allHeaderFields)")
-            log("Accept-Ranges \(httpResponse.value(forHeaderKey: "Accept-Ranges"))")
+            gslog("Accept-Ranges \(httpResponse.value(forHeaderKey: "Accept-Ranges"))")
 
 
             cacheHandler.set(info: VideoInfo(

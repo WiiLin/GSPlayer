@@ -23,6 +23,12 @@ public class VideoLoadManager: NSObject {
         videoLoader.cancel()
     }
 
+    public func remove(url: URL) {
+        guard let videoLoader = loaderMap[url] else { return }
+        videoLoader.cancel()
+        loaderMap.removeValue(forKey: videoLoader.url)
+    }
+
 }
 
 extension VideoLoadManager: AVAssetResourceLoaderDelegate {
@@ -41,10 +47,10 @@ extension VideoLoadManager: AVAssetResourceLoaderDelegate {
 
         do {
             if let loader = loaderMap[url] {
-                log("shouldWaitForLoadingOfRequestedResource resourceLoader append 1")
+//                GSLogManager.shared.log("shouldWaitForLoadingOfRequestedResource resourceLoader append 1")
                 loader.append(request: loadingRequest)
             } else {
-                log("shouldWaitForLoadingOfRequestedResource resourceLoader append 2")
+//                GSLogManager.shared.log("shouldWaitForLoadingOfRequestedResource resourceLoader append 2")
                 let loader = try VideoLoader(url: url)
                 loader.delegate = self
                 loader.append(request: loadingRequest)

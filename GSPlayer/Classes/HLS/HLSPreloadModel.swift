@@ -53,10 +53,10 @@ public extension HLSPreloadModel {
             guard let timeRange = playerItem.loadedTimeRanges.first?.timeRangeValue else { return }
             let loadedTime = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)
             let totalTime = CMTimeGetSeconds(playerItem.duration)
-            log("\(url.lastPathComponent), loadedTimeRanges: \(loadedTime)/\(totalTime)")
+            gslog("\(url), loadedTimeRanges: \(loadedTime)/\(totalTime)")
             if loadedTime >= 0.5, readyToPlay == false {
                 self.readyToPlay = true
-                log("\(url.lastPathComponent) readyToPlay ✅")
+                gslog("\(url) readyToPlay ✅")
                 resetObservation()
             }
         }
@@ -65,11 +65,11 @@ public extension HLSPreloadModel {
 
         self.avPlayer = player
 
-        log("\(url.lastPathComponent) startBuffering")
+        gslog("\(url) startBuffering")
     }
 
     func reset() {
-        log("\(url.lastPathComponent) reset")
+        gslog("\(url) reset")
         resetObservation()
         avPlayer?.pause()
         avPlayer?.replaceCurrentItem(with: nil)

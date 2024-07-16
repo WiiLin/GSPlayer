@@ -12,13 +12,12 @@ public struct VideoCacheConfiguration: Codable {
     
     static func configuration(for videoFilePath: String) throws -> VideoCacheConfiguration {
         let filePath = configurationFilePath(for: videoFilePath)
-        
-        guard
-            FileManager.default.fileExists(atPath: filePath),
-            let data = FileManager.default.contents(atPath: filePath)
-            else { return VideoCacheConfiguration(filePath: filePath) }
-        
+        let fileExists = FileManager.default.fileExists(atPath: filePath)
+        gslog("configuration \(videoFilePath): fileExists = \(fileExists)")
+        guard fileExists, let data = FileManager.default.contents(atPath: filePath) else { return VideoCacheConfiguration(filePath: filePath) }
+
         var configuration = try JSONDecoder().decode(VideoCacheConfiguration.self, from: data)
+       
         configuration.filePath = filePath
         
         return configuration

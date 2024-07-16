@@ -13,9 +13,11 @@ private let directory = NSTemporaryDirectory().appendingPathComponent("GSPlayer"
 public enum VideoCacheManager {
     
     public static func cachedFilePath(for url: URL) -> String {
-        return directory
+        let string =  directory
             .appendingPathComponent(url.absoluteString.md5)
             .appendingPathExtension(url.pathExtension)!
+        gslog("cachedFilePath: \(url.absoluteString) -> \(string)")
+        return string
     }
     
     public static func cachedConfiguration(for url: URL) throws -> VideoCacheConfiguration {
