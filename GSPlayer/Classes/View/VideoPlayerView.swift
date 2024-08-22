@@ -10,72 +10,72 @@ import UIKit
 import AVFoundation
 
 open class VideoPlayerView: UIView {
-    
+
     public enum State {
-        
+
         /// None
         case none
-        
+
         /// From the first load to get the first frame of the video
         case loading
-        
+
         /// Playing now
         case playing
-        
+
         /// Pause, will be called repeatedly when the buffer progress changes
         case paused(playProgress: Double, bufferProgress: Double)
-        
+
         /// An error occurred and cannot continue playing
         case error(NSError)
     }
-    
+
     public enum PausedReason: Int {
-        
+
         /// Pause because the player is not visible, stateDidChanged is not called when the buffer progress changes
         case hidden
-        
+
         /// Pause triggered by user interaction, default behavior
         case userInteraction
-        
+
         /// Waiting for resource completion buffering
         case waitingKeepUp
     }
-    
+
     /// An object that manages a player's visual output.
     public let playerLayer = AVPlayerLayer()
-    
+
     /// An object that provides the interface to control the player’s transport behavior.
     public var player: AVPlayer? {
         get { return playerLayer.player }
         set { playerLayer.player = newValue }
     }
-    
+
     /// URL currently playing.
     public private(set) var playerURL: URL?
-    
+
     /// Get current video status.
     public private(set) var state: State = .none {
         didSet { stateDidChanged(state: state, previous: oldValue) }
     }
-    
+
     /// The reason the video was paused.
     public private(set) var pausedReason: PausedReason = .waitingKeepUp
-    
+
     /// Number of replays.
     public private(set) var replayCount: Int = 0
-    
+
     /// Whether the video will be automatically replayed until the end of the video playback.
     open var isAutoReplay: Bool = true
-    
+
     /// Play to the end time.
     open var playToEndTime: (() -> Void)?
-    
+
     /// Playback status changes, such as from play to pause.
     open var stateDidChanged: ((State) -> Void)?
-    
+
     /// Replay after playing to the end.
     open var replay: (() -> Void)?
-    
+
     /// Whether the video is muted, only for this instance.
     open var isMuted: Bool {
         get { return player?.isMuted ?? false }
@@ -90,48 +90,48 @@ open class VideoPlayerView: UIView {
         get { return player?.volume.double ?? 0 }
         set { player?.volume = newValue.float }
     }
-    
+
     /// Played progress, value range 0-1.
     public var playProgress: Double {
         return isLoaded ? player?.playProgress ?? 0 : 0
     }
-    
+
     /// Played length in seconds.
     public var currentDuration: Double {
         return isLoaded ? player?.currentDuration ?? 0 : 0
     }
-    
+
     /// Buffered progress, value range 0-1.
     public var bufferProgress: Double {
         return isLoaded ? player?.bufferProgress ?? 0 : 0
     }
-    
+
     /// Buffered length in seconds.
     public var currentBufferDuration: Double {
         return isLoaded ? player?.currentBufferDuration ?? 0 : 0
     }
-    
+
     /// Total video duration in seconds.
     public var totalDuration: Double {
         return isLoaded ? player?.totalDuration ?? 0 : 0
     }
-    
+
     /// The total watch time of this video, in seconds.
     public var watchDuration: Double {
         return isLoaded ? currentDuration + totalDuration * Double(replayCount) : 0
     }
-    
+
     private var isLoaded = false
     private var isReplay = false
-    
+
     private var playerBufferingObservation: NSKeyValueObservation?
     private var playerItemKeepUpObservation: NSKeyValueObservation?
     private var playerItemStatusObservation: NSKeyValueObservation?
     private var playerLayerReadyForDisplayObservation: NSKeyValueObservation?
     private var playerTimeControlStatusObservation: NSKeyValueObservation?
-    
+
     // MARK: - Lifecycle
-    
+
     open override var contentMode: UIView.ContentMode {
         didSet {
             switch contentMode {
@@ -141,34 +141,34 @@ open class VideoPlayerView: UIView {
             }
         }
     }
-    
+
     public init() {
         super.init(frame: .zero)
         configureInit()
     }
-    
+
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         configureInit()
     }
-    
+
     open override func layoutSubviews() {
         super.layoutSubviews()
         guard playerLayer.superlayer == layer else { return }
-        
+
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         playerLayer.frame = bounds
         CATransaction.commit()
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
 }
 
 @objc extension VideoPlayerView {
-    
+
     /// Play a video of the specified url.
     ///
     /// - Parameter url: Can be a local or remote URL
@@ -178,16 +178,16 @@ open class VideoPlayerView: UIView {
             player?.playImmediately(atRate: speedRate)
             return
         }
-        
+
         observe(player: nil)
         observe(playerItem: nil)
-        
+
         self.player?.currentItem?.cancelPendingSeeks()
         self.player?.currentItem?.asset.cancelLoading()
-        
+
         let player = AVPlayer()
         player.automaticallyWaitsToMinimizeStalling = false
-        
+
         let playerItem = AVPlayerItem(loader: url)
         playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
 
@@ -197,44 +197,16 @@ open class VideoPlayerView: UIView {
         self.replayCount = 0
         self.isReplay = false
         self.isLoaded = false
-        
+
         if playerItem.isEnoughToPlay || url.isFileURL {
             state = .none
             isLoaded = playerItem.status == .readyToPlay
             player.playImmediately(atRate: speedRate)
-            gslog("player playImmediately")
         } else {
             state = .loading
-            gslog("player loading")
         }
 
         player.replaceCurrentItem(with: playerItem)
-        gslog("play! playerItem.status = \(playerItem.status)")
-
-        observe(player: player)
-        observe(playerItem: playerItem)
-    }
-
-    open func playHLS(for avPlayer: AVPlayer, url: URL, playerItem: AVPlayerItem) {
-
-
-        observe(player: nil)
-        observe(playerItem: nil)
-
-        self.player?.currentItem?.cancelPendingSeeks()
-        self.player?.currentItem?.asset.cancelLoading()
-
-        self.player = avPlayer
-        self.playerURL = url
-        self.pausedReason = .waitingKeepUp
-        self.replayCount = 0
-        self.isReplay = false
-        self.isLoaded = false
-
-        isLoaded = true
-        avPlayer.playImmediately(atRate: speedRate)
-
-        gslog("play! playerItem.status = \(playerItem.status)")
 
         observe(player: player)
         observe(playerItem: playerItem)
@@ -248,40 +220,40 @@ open class VideoPlayerView: UIView {
         player?.seek(to: .zero)
         resume()
     }
-    
+
     /// Continue playing video.
     open func resume() {
         pausedReason = .waitingKeepUp
         player?.playImmediately(atRate: speedRate)
     }
-    
+
     /// Pause video.
     open func pause() {
         player?.pause()
     }
-    
+
     /// Moves the playback cursor and invokes the specified block when the seek operation has either been completed or been interrupted.
     open func seek(to time: CMTime, completion: ((Bool) -> Void)? = nil) {
         player?.seek(to: time) { completion?($0) }
     }
-    
+
     /// Moves the playback cursor within a specified time bound and invokes the specified block when the seek operation has either been completed or been interrupted.
     open func seek(to time: CMTime, toleranceBefore: CMTime, toleranceAfter: CMTime, completion: @escaping (Bool) -> Void) {
         player?.seek(to: time, toleranceBefore: toleranceBefore, toleranceAfter: toleranceAfter, completionHandler: completion)
     }
-    
+
     /// Requests invocation of a block when specified times are traversed during normal playback.
     @discardableResult
     @nonobjc open func addBoundaryTimeObserver(forTimes times: [CMTime], queue: DispatchQueue? = nil, using: @escaping () -> Void) -> Any? {
         return player?.addBoundaryTimeObserver(forTimes: times.map { NSValue(time: $0) }, queue: queue, using: using)
     }
-    
+
     /// Requests invocation of a block during playback to report changing time.
     @discardableResult
     open func addPeriodicTimeObserver(forInterval interval: CMTime, queue: DispatchQueue? = nil, using: @escaping (CMTime) -> Void) -> Any? {
         return player?.addPeriodicTimeObserver(forInterval: interval, queue: queue, using: using)
     }
-    
+
     /// Cancels a previously registered periodic or boundary time observer.
     open func removeTimeObserver(_ observer: Any) {
         player?.removeTimeObserver(observer)
@@ -310,7 +282,7 @@ open class VideoPlayerView: UIView {
 }
 
 public extension VideoPlayerView {
-    
+
     /// Pause video.
     ///
     /// - Parameter reason: Reason for pause
@@ -321,10 +293,10 @@ public extension VideoPlayerView {
 }
 
 private extension VideoPlayerView {
-    
+
     func configureInit() {
-        
-        isHidden = false
+
+        isHidden = true
 
         NotificationCenter.default.addObserver(
             self,
@@ -332,130 +304,131 @@ private extension VideoPlayerView {
             name: .AVPlayerItemDidPlayToEndTime,
             object: nil
         )
-        
+
         layer.addSublayer(playerLayer)
     }
-    
+
     func stateDidChanged(state: State, previous: State) {
-        
+
         guard state != previous else {
             return
         }
-        
+
         switch state {
         case .playing, .paused: isHidden = false
-        default:                isHidden = false
+        default:                isHidden = true
         }
-        gslog("state \(state)")
+        gslog("[\(playerURL)] stateDidChange \(state)")
         stateDidChanged?(state)
     }
-    
+
     func observe(player: AVPlayer?) {
-        
+
         guard let player = player else {
             playerLayerReadyForDisplayObservation = nil
             playerTimeControlStatusObservation = nil
             return
         }
-        
+
         playerLayerReadyForDisplayObservation = playerLayer.observe(\.isReadyForDisplay) { [unowned self, unowned player] playerLayer, _ in
-            gslog("isReadyForDisplay Observation \(playerLayer.isReadyForDisplay), rate \(player.rate)")
+            gslog("[\(playerURL)] playerLayerReadyForDisplayObservation isReadyForDisplay = \(playerLayer.isReadyForDisplay), rate = \(player.rate)")
             if playerLayer.isReadyForDisplay, player.rate > 0 {
                 self.isLoaded = true
                 self.state = .playing
             }
         }
-        
+
         playerTimeControlStatusObservation = player.observe(\.timeControlStatus) { [unowned self] player, _ in
+            gslog("[\(playerURL)] playerTimeControlStatusObservation, timeControlStatus = \(player.timeControlStatus), isReady = \(self.isReplay), rate = \(player.rate)")
             switch player.timeControlStatus {
             case .paused:
-                gslog("timeControlStatus Observation paused")
                 guard !self.isReplay else { break }
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
-                if self.pausedReason == .waitingKeepUp { player.playImmediately(atRate: speedRate) }
-
+                gslog("[\(playerURL)] playerTimeControlStatusObservation A")
+                if self.pausedReason == .waitingKeepUp {
+                    gslog("[\(playerURL)] playerTimeControlStatusObservation A - 1")
+                    player.playImmediately(atRate: speedRate)
+                }
             case .waitingToPlayAtSpecifiedRate:
-                gslog("timeControlStatus Observation waitingToPlayAtSpecifiedRate")
+                gslog("[\(playerURL)] playerTimeControlStatusObservation B")
                 break
             case .playing:
-                gslog("timeControlStatus Observation playing")
                 if self.playerLayer.isReadyForDisplay, player.rate > 0 {
                     self.isLoaded = true
                     if self.playProgress == 0, self.isReplay { self.isReplay = false; break }
                     self.state = .playing
+                    gslog("[\(playerURL)] playerTimeControlStatusObservation C")
                 }
             @unknown default:
                 break
             }
         }
     }
-    
+
     func observe(playerItem: AVPlayerItem?) {
-        
+
         guard let playerItem = playerItem else {
             playerBufferingObservation = nil
             playerItemStatusObservation = nil
             playerItemKeepUpObservation = nil
             return
         }
-        
+
         playerBufferingObservation = playerItem.observe(\.loadedTimeRanges) { [unowned self] item, _ in
+            gslog("[\(playerURL)] loadedTimeRanges A")
             if case .paused = self.state, self.pausedReason != .hidden {
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
-                gslog("loadedTimeRanges paused(playProgress)")
-            }
-            if let timeRange = item.loadedTimeRanges.first?.timeRangeValue {
-                let loadedTime = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)
-                let totalTime = CMTimeGetSeconds(item.duration)
-                let string = "loadedTimeRanges Observation \(String(format: "%.2f", loadedTime)) 秒 / 共 \( String(format: "%.2f", totalTime)) 秒"
-                gslog(string)
             }
 
-
-            guard let url = playerURL else { return }
+//            if self.bufferProgress >= 0.99 || (self.currentBufferDuration - self.currentDuration) > 3 {
+//                VideoPreloadManager.shared.start()
+//            } else {
+//                VideoPreloadManager.shared.pause()
+//            }
         }
 
         playerItemStatusObservation = playerItem.observe(\.status) { [unowned self] item, _ in
-            gslog("playerItem status \(item.status) ,error = \(item.error), url = \(item.url?.absoluteString ?? "")")
             if item.status == .failed, let error = item.error as NSError? {
                 self.state = .error(error)
             }
         }
-        
+
         playerItemKeepUpObservation = playerItem.observe(\.isPlaybackLikelyToKeepUp) { [unowned self] item, _ in
-            gslog("isPlaybackLikelyToKeepUp Observation \(item.isPlaybackLikelyToKeepUp)")
+            gslog("[\(playerURL)] playerItemKeepUpObservation A")
             if item.isPlaybackLikelyToKeepUp {
+                gslog("[\(playerURL)] playerItemKeepUpObservation B")
                 if self.player?.rate == 0, self.pausedReason == .waitingKeepUp {
+                    gslog("[\(playerURL)] playerItemKeepUpObservation C")
                     self.player?.playImmediately(atRate: speedRate)
                 }
             }
         }
     }
-    
+
     @objc func playerItemDidReachEnd(notification: Notification) {
         guard (notification.object as? AVPlayerItem) == player?.currentItem else {
             return
         }
-        
+
         playToEndTime?()
-        
+
         guard isAutoReplay, pausedReason == .waitingKeepUp else {
             return
         }
-        
+
         isReplay = true
-        
+
         replay?()
         replayCount += 1
-        
+
         player?.seek(to: CMTime.zero)
         player?.playImmediately(atRate: speedRate)
     }
-    
+
 }
 
 extension VideoPlayerView.State: Equatable {
-    
+
     public static func == (lhs: VideoPlayerView.State, rhs: VideoPlayerView.State) -> Bool {
         switch (lhs, rhs) {
         case (.none, .none):
@@ -472,6 +445,33 @@ extension VideoPlayerView.State: Equatable {
             return false
         }
     }
-    
+
+}
+
+extension VideoPlayerView {
+    open func playHLS(for avPlayer: AVPlayer, url: URL, playerItem: AVPlayerItem) {
+
+
+        observe(player: nil)
+        observe(playerItem: nil)
+
+        self.player?.currentItem?.cancelPendingSeeks()
+        self.player?.currentItem?.asset.cancelLoading()
+
+        self.player = avPlayer
+        self.playerURL = url
+        self.pausedReason = .waitingKeepUp
+        self.replayCount = 0
+        self.isReplay = false
+        self.isLoaded = false
+
+        isLoaded = true
+        avPlayer.playImmediately(atRate: speedRate)
+
+        gslog("play! playerItem.status = \(playerItem.status)")
+
+        observe(player: player)
+        observe(playerItem: playerItem)
+    }
 }
 #endif
