@@ -15,7 +15,7 @@ public func gslog(_ message: String, file: String = #file, line: Int = #line) {
 public class GSLogManager {
     public static let shared = GSLogManager()
 
-    public var isLoggingEnabled: Bool = true
+    public var isLoggingEnabled: Bool = false
 
     private init() {}
 

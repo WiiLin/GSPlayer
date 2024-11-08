@@ -50,6 +50,14 @@ open class VideoPlayerView: UIView {
         set { playerLayer.player = newValue }
     }
 
+//    public var isPlaying: Bool {
+//        if let player = player {
+//            return player.rate != 0
+//        } else {
+//            return false
+//        }
+//    }
+
     /// URL currently playing.
     public private(set) var playerURL: URL?
 
@@ -224,7 +232,19 @@ open class VideoPlayerView: UIView {
     /// Continue playing video.
     open func resume() {
         pausedReason = .waitingKeepUp
-        player?.playImmediately(atRate: speedRate)
+
+        let currentTime = player?.currentTime() ?? CMTime.zero
+
+        // 计算前一秒的时间点
+        let oneSecondBefore = CMTime(seconds: 0.5, preferredTimescale: currentTime.timescale)
+        let newTime = currentTime - oneSecondBefore
+
+        // 确保时间不会超出视频的开始边界
+        let adjustedTime = CMTimeMaximum(newTime, CMTime.zero)
+
+        player?.seek(to: adjustedTime) { [weak self] _ in
+                  self?.player?.play()
+              }
     }
 
     /// Pause video.
@@ -309,7 +329,7 @@ private extension VideoPlayerView {
     }
 
     func stateDidChanged(state: State, previous: State) {
-
+        gslog("state \(state), previous = \(previous)")
         guard state != previous else {
             return
         }
@@ -318,7 +338,7 @@ private extension VideoPlayerView {
         case .playing, .paused: isHidden = false
         default:                isHidden = true
         }
-        gslog("[\(playerURL)] stateDidChange \(state)")
+        gslog("stateDidChange \(state), isHidden = \(isHidden)")
         stateDidChanged?(state)
     }
 
@@ -331,7 +351,7 @@ private extension VideoPlayerView {
         }
 
         playerLayerReadyForDisplayObservation = playerLayer.observe(\.isReadyForDisplay) { [unowned self, unowned player] playerLayer, _ in
-            gslog("[\(playerURL)] playerLayerReadyForDisplayObservation isReadyForDisplay = \(playerLayer.isReadyForDisplay), rate = \(player.rate)")
+            gslog("playerLayerReadyForDisplayObservation isReadyForDisplay = \(playerLayer.isReadyForDisplay), rate = \(player.rate)")
             if playerLayer.isReadyForDisplay, player.rate > 0 {
                 self.isLoaded = true
                 self.state = .playing
@@ -339,25 +359,32 @@ private extension VideoPlayerView {
         }
 
         playerTimeControlStatusObservation = player.observe(\.timeControlStatus) { [unowned self] player, _ in
-            gslog("[\(playerURL)] playerTimeControlStatusObservation, timeControlStatus = \(player.timeControlStatus), isReady = \(self.isReplay), rate = \(player.rate)")
+            gslog("playerTimeControlStatusObservation, timeControlStatus = \(player.timeControlStatus.desc), isReady = \(self.isReplay), rate = \(player.rate)")
             switch player.timeControlStatus {
             case .paused:
                 guard !self.isReplay else { break }
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
-                gslog("[\(playerURL)] playerTimeControlStatusObservation A")
+                gslog("playerTimeControlStatusObservation A")
                 if self.pausedReason == .waitingKeepUp {
-                    gslog("[\(playerURL)] playerTimeControlStatusObservation A - 1")
+                    gslog(" playerTimeControlStatusObservation A - 1")
                     player.playImmediately(atRate: speedRate)
                 }
             case .waitingToPlayAtSpecifiedRate:
-                gslog("[\(playerURL)] playerTimeControlStatusObservation B")
+                gslog("playerTimeControlStatusObservation B")
                 break
             case .playing:
+                gslog("playerTimeControlStatusObservation C, isReadyForDisplay = \(playerLayer.isReadyForDisplay), rate = \(player.rate)")
                 if self.playerLayer.isReadyForDisplay, player.rate > 0 {
                     self.isLoaded = true
-                    if self.playProgress == 0, self.isReplay { self.isReplay = false; break }
+                    if self.playProgress == 0, self.isReplay {
+                        gslog("playerTimeControlStatusObservation C-1")
+                        self.isReplay = false
+                        break
+                    }
                     self.state = .playing
-                    gslog("[\(playerURL)] playerTimeControlStatusObservation C")
+                    gslog("playerTimeControlStatusObservation C-2")
+                } else {
+                    gslog("playerTimeControlStatusObservation C-3")
                 }
             @unknown default:
                 break
@@ -375,8 +402,9 @@ private extension VideoPlayerView {
         }
 
         playerBufferingObservation = playerItem.observe(\.loadedTimeRanges) { [unowned self] item, _ in
-            gslog("[\(playerURL)] loadedTimeRanges A")
+            gslog("loadedTimeRanges A")
             if case .paused = self.state, self.pausedReason != .hidden {
+                gslog("loadedTimeRanges B")
                 self.state = .paused(playProgress: self.playProgress, bufferProgress: self.bufferProgress)
             }
 
@@ -394,11 +422,11 @@ private extension VideoPlayerView {
         }
 
         playerItemKeepUpObservation = playerItem.observe(\.isPlaybackLikelyToKeepUp) { [unowned self] item, _ in
-            gslog("[\(playerURL)] playerItemKeepUpObservation A")
+            gslog("playerItemKeepUpObservation A")
             if item.isPlaybackLikelyToKeepUp {
-                gslog("[\(playerURL)] playerItemKeepUpObservation B")
+                gslog("playerItemKeepUpObservation B")
                 if self.player?.rate == 0, self.pausedReason == .waitingKeepUp {
-                    gslog("[\(playerURL)] playerItemKeepUpObservation C")
+                    gslog("playerItemKeepUpObservation C")
                     self.player?.playImmediately(atRate: speedRate)
                 }
             }
@@ -473,5 +501,34 @@ extension VideoPlayerView {
         observe(player: player)
         observe(playerItem: playerItem)
     }
+
+    open func resumeAndBackSeconds() {
+        pausedReason = .waitingKeepUp
+
+        let currentTime = player?.currentTime() ?? CMTime.zero
+
+        let oneSecondBefore = CMTime(seconds: 0.5, preferredTimescale: currentTime.timescale)
+        let newTime = currentTime - oneSecondBefore
+
+        let adjustedTime = CMTimeMaximum(newTime, CMTime.zero)
+
+        player?.seek(to: adjustedTime) { [weak self] _ in
+            self?.player?.play()
+        }
+    }
 }
 #endif
+
+
+extension AVPlayer.TimeControlStatus {
+    var desc: String {
+        switch self {
+        case .paused:
+            return "paused"
+        case .waitingToPlayAtSpecifiedRate:
+            return "waitingToPlayAtSpecifiedRate"
+        case .playing:
+            return "playing"
+        }
+    }
+}

@@ -12,29 +12,29 @@ public class HLSPreloadManager: NSObject {
 
     public static let shared = HLSPreloadManager()
 
-    private var items: [URL: HLSPreloadModel] = [:]
+    private var items: [String: HLSPreloadModel] = [:]
 
 }
 
 public extension HLSPreloadManager {
-    func item(with url: URL) -> HLSPreloadModel? {
-        return items[url]
+    func item(with key: String) -> HLSPreloadModel? {
+        return items[key]
     }
 
-    func remove(with url: URL) {
-        if let item = items[url] {
+    func remove(with key: String) {
+        if let item = items[key] {
             item.reset()
         }
-        items[url] = nil
+        items[key] = nil
     }
 
-    func preload(with url: URL) {
-        if item(with: url) != nil {
-            self.remove(with: url)
-            self.preload(with: url)
+    func preload(with key: String, url: URL) {
+        if item(with: key) != nil {
+            self.remove(with: key)
+            self.preload(with: key, url: url)
         } else if let item = HLSPreloadModel(url: url){
             item.startBuffering()
-            self.items[url] = item
+            self.items[key] = item
         }
     }
 }
