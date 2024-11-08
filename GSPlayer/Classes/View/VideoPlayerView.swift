@@ -196,7 +196,7 @@ open class VideoPlayerView: UIView {
         let player = AVPlayer()
         player.automaticallyWaitsToMinimizeStalling = false
 
-        let playerItem = AVPlayerItem(loader: url)
+        let playerItem = AVPlayerItem(url: url)
         playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
 
         self.player = player
@@ -206,13 +206,15 @@ open class VideoPlayerView: UIView {
         self.isReplay = false
         self.isLoaded = false
 
-        if playerItem.isEnoughToPlay || url.isFileURL {
-            state = .none
-            isLoaded = playerItem.status == .readyToPlay
-            player.playImmediately(atRate: speedRate)
-        } else {
-            state = .loading
-        }
+//        if playerItem.isEnoughToPlay || url.isFileURL {
+//            state = .none
+//            isLoaded = playerItem.status == .readyToPlay
+//            player.playImmediately(atRate: speedRate)
+//        } else {
+//            state = .loading
+//        }
+
+        player.playImmediately(atRate: speedRate)
 
         player.replaceCurrentItem(with: playerItem)
 
